@@ -22,7 +22,13 @@ if __name__ == '__main__':
 
     # Run the command
     if args.command == 'density':
-        gmx.density(args.xtc, args.tpr, args.ndx, args.out, args.gnm, density_input='ALL_TERM\n{gnm}\n'.format(gnm=args.gnm))
+        gmx.density(args.xtc, args.tpr, args.ndx, args.out, args.gnm, 'ALL_TERM')
+    elif args.command == 'no-jump':
+        gmx.no_jump(args.xtc, args.tpr, args.ndx, args.out)
+    elif args.command == 'msd':
+        gmx.msd(args.xtc, args.tpr, args.ndx, args.out, args.gnm)
+    elif args.command == 'msd-rmcomm':
+        gmx.msd_rmcomm(args.xtc, args.tpr, args.ndx, args.out, args.gnm)
     elif args.command == 'nearest-neighbour':
         nn.run(args.gro, args.xtc, args.mol, int(args.frames), int(args.nn), bead_name=args.bead)
     else:
