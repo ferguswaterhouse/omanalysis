@@ -1,6 +1,7 @@
 import argparse
 import gromacs as gmx
 import neighbour as nn
+import area
 
 
 if __name__ == '__main__':
@@ -14,7 +15,7 @@ if __name__ == '__main__':
     for file_type in gmx_files:
         parser.add_argument(f'-{file_type}', type=str)
 
-    special_arguments = ['out', 'deffnm', 'gnm', 'mol', 'frames', 'nn', 'bead']
+    special_arguments = ['out', 'deffnm', 'gnm', 'mol', 'frames', 'nn', 'bead', 'xvg']
     for arg in special_arguments:
         parser.add_argument(f'-{arg}', type=str)
 
@@ -31,5 +32,7 @@ if __name__ == '__main__':
         gmx.msd_rmcomm(args.xtc, args.tpr, args.ndx, args.out, args.gnm)
     elif args.command == 'nearest-neighbour':
         nn.run(args.gro, args.xtc, args.mol, int(args.frames), int(args.nn), bead_name=args.bead)
+    elif args.command == 'area':
+        area.run(args.edr, args.xvg, 252)
     else:
         print('Command not recognized')

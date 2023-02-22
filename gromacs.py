@@ -47,3 +47,13 @@ def msd_rmcomm(xtc_file, tpr_file, ndx_file, out_file, ndx_group_name):
     print(' > RUNNING GMX MSD RMCOMM FOR {}...'.format(ndx_group_name))
     subprocess.run([msd_cmd], shell=True, input=msd_input, encoding='ascii')
     print(' > GMX MSD RMCOMM FOR {} COMPLETE'.format(ndx_group_name))
+
+
+def boxxy(edr_file, out_file):
+    energy_cmd = "gmx energy -f {edr} -o {xvg}".format(
+        edr=edr_file, 
+        xvg=out_file)
+    energy_input = '12\n13\n\n'
+    print(' > GETTING BOX X AND Y DIMENSIONS...')
+    subprocess.run([energy_cmd], shell=True, input=energy_input, encoding='ascii')
+    print(' > BOX X AND Y DIMENSIONS RETRIEVED...')
