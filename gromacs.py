@@ -57,3 +57,12 @@ def boxxy(edr_file, out_file):
     print(' > GETTING BOX X AND Y DIMENSIONS...')
     subprocess.run([energy_cmd], shell=True, input=energy_input, encoding='ascii')
     print(' > BOX X AND Y DIMENSIONS RETRIEVED...')
+
+
+def index(gro_file, out_file, index_input):
+    index_cmd = 'gmx make_ndx -f {gro} -o {ndx}'.format(
+        gro=gro_file,
+        ndx=out_file)
+    print(' > CREATING INDEX FILE...')
+    subprocess.run([index_cmd], shell=True, input=index_input, encoding='ascii')
+    print(' > INDEX FILE CREATED...')
