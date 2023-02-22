@@ -2,6 +2,7 @@ import argparse
 import gromacs as gmx
 import neighbour as nn
 import area
+import index
 
 
 if __name__ == '__main__':
@@ -34,5 +35,7 @@ if __name__ == '__main__':
         nn.run(args.gro, args.xtc, args.mol, int(args.frames), int(args.nn), bead_name=args.bead)
     elif args.command == 'area':
         area.run(args.edr, args.xvg, 252)
+    elif args.command == 'index-complete':
+        index.run(args.gro, args.ndx)
     else:
         print('Command not recognized')
