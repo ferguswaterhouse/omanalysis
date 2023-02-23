@@ -16,9 +16,13 @@ if __name__ == '__main__':
     for file_type in gmx_files:
         parser.add_argument(f'-{file_type}', type=str)
 
-    special_arguments = ['out', 'deffnm', 'gnm', 'mol', 'frames', 'nn', 'bead', 'xvg']
+    special_arguments = ['out', 'deffnm', 'gnm', 'mol', 'frames', 'nn', 'lps', 'bead', 'xvg']
     for arg in special_arguments:
         parser.add_argument(f'-{arg}', type=str)
+
+    list_arguments = ['ions']
+    for arg in list_arguments:
+        parser.add_argument(f'-{arg}', nargs='+', type=str)
 
     args = parser.parse_args()
 
@@ -36,6 +40,6 @@ if __name__ == '__main__':
     elif args.command == 'area':
         area.run(args.edr, args.xvg, 252)
     elif args.command == 'index-complete':
-        index.run(args.gro, args.ndx)
+        index.run(args.gro, args.lps, args.ions, args.ndx)
     else:
         print('Command not recognized')

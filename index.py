@@ -17,6 +17,9 @@ def create_all_groups(start_index, lps, ions):
         '{}_HEAD_COO1'.format(lps): '"{}" & a S01'.format(lps),
         '{}_HEAD_COO2'.format(lps): '"{}" & a S10'.format(lps),
         '{}_HEAD_COO'.format(lps):  '"{}" & a S01 S10'.format(lps),
+        '{}_CORE_PO41'.format(lps): '"{}" & a S15'.format(lps),
+        '{}_CORE_PO42'.format(lps): '"{}" & a S19'.format(lps),
+        '{}_CORE_PO4'.format(lps):  '"{}" & a S15 S19'.format(lps),
         '{}_PO4'.format(lps):       '"{}" & a P*'.format(lps),
         '{}_CORE'.format(lps):      '"{}" & a S*'.format(lps),
         '{}_HEAD'.format(lps):      '"{}" & a GM*'.format(lps),
@@ -47,7 +50,10 @@ def create_all_groups(start_index, lps, ions):
         'ALL_GLYC':                 '"{}_GLYC" | "POPE_GLYC" | "POPG_GLYC" | "CDL2_GLYC"'.format(lps),
         'ALL_CARB':                 '"{}_CARB" | "POPE_CARB" | "POPG_CARB" | "CDL2_CARB"'.format(lps),
         'ALL_TAIL':                 '"{}_TAIL" | "POPE_TAIL" | "POPG_TAIL" | "CDL2_TAIL"'.format(lps),
-        'ALL_TERM':                 '"{}_TERM" | "POPE_TERM" | "POPG_TERM" | "CDL2_TERM"'.format(lps)
+        'ALL_TERM':                 '"{}_TERM" | "POPE_TERM" | "POPG_TERM" | "CDL2_TERM"'.format(lps),
+        'NA':                       "a NA",
+        'CL':                       "a CL",
+        'CA':                       "a CA"
     }
 
     ndx_groups_to_define = [] # List of groups to define in command
@@ -67,6 +73,12 @@ def create_all_groups(start_index, lps, ions):
         '{}_CARB'.format(lps),
         '{}_TAIL'.format(lps),
         '{}_TERM'.format(lps),
+    ]
+
+    ramp_lps_group_names = [
+        '{}_CORE_PO41'.format(lps),
+        '{}_CORE_PO42'.format(lps),
+        '{}_CORE_PO4'.format(lps)
     ]
 
     inner_leaflet_group_names = [
@@ -101,8 +113,12 @@ def create_all_groups(start_index, lps, ions):
 
     # Adds the group names to a list of groups to define
     ndx_groups_to_define.extend(universal_lps_group_names)
+    if lps == 'RAMP': ndx_groups_to_define.extend(ramp_lps_group_names)
     ndx_groups_to_define.extend(inner_leaflet_group_names)
     ndx_groups_to_define.extend(grouped_group_names)
+    ndx_groups_to_define.extend(ions) # Adds selected ions to list of groups to define
+
+    print(ndx_groups_to_define)
 
     ndx_commands = ['\n'.join([ndx_group_commands[ndx_group_name], 'name {} {}'.format(str(start_index+i), ndx_group_name)]) for i, ndx_group_name in enumerate(ndx_groups_to_define)]
     ndx_commands.append('q\n')
@@ -111,7 +127,7 @@ def create_all_groups(start_index, lps, ions):
     return ndx_input
 
 
-def run(gro_file, default_ndx_file):
-    default_index_groups = learn_default_index_groups(gro_file, default_ndx_file)
-    ndx_input = create_all_groups(len(default_index_groups), 'REMP', ('NA', 'CA'))
-    gromacs.index(gro_file, 'test.ndx', ndx_input)
+def run(gro_file, lps, ions, out_file):
+    default_index_groups = learn_default_index_groups(gro_file, 'default_'+out_file)
+    ndx_input = create_all_groups(len(default_index_groups), lps, ions)
+    gromacs.index(gro_file, out_file, ndx_input)
