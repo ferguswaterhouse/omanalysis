@@ -5,14 +5,15 @@ import area
 import index
 import order
 import thickness
+import torsion
 
 # TO DO:
-# - Torsional angle analysis
-# - Add sugar length analysis
 # - Order parameters - Change to MDAnalysis?
 # - Add them all into one pipeline x 3
+# - Add sugar length analysis ???
 # - Contact data ??? - Not necessary yet
 # - Add membrane thickness analysis - DONE
+# - Torsional angle analysis - DONE
 
 if __name__ == '__main__':
     
@@ -54,5 +55,7 @@ if __name__ == '__main__':
         order.run(args.xtc, args.tpr, args.lps, 0, str(args.time), (0, 0, 1), args.out)
     elif args.command == 'thickness':
         thickness.run(args.gro, args.xtc, args.il, args.ol, args.ib, args.ob, int(args.frames))
+    elif args.command == 'torsion':
+        torsion.run(args.gro, args.xtc, args.out)
     else:
         print('Command not recognized')
