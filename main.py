@@ -6,12 +6,12 @@ import index
 import order
 
 # TO DO:
-# - Order parameters
-# - Add membrane thickness analysis
-# - Contact data ???
 # - Add sugar length analysis
+# - Order parameters - Change to MDAnalysis?
+# - Add membrane thickness analysis - How to do this? - Average phosphate position for each frame
+# - Torsional angle analysis
+# - Contact data ??? - Not necessary yet
 # - Add them all into one pipeline x 3
-# - Convert order.py to an MDAnalysis script
 
 
 if __name__ == '__main__':
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('command', help='Command to run. Options: [complete, msd, density]')
+    parser.add_argument('command', help='Command to run. Options: [complete, density, np-jump, msd, msd-rmcomm, nearest-neighbour, area, index-complete, order]')
 
     gmx_files = ['gro', 'xtc', 'tpr', 'ndx', 'edr']
     for file_type in gmx_files:
