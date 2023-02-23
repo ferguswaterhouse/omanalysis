@@ -4,6 +4,7 @@ import neighbour as nn
 import area
 import index
 import order
+import thickness
 
 # TO DO:
 # - Add sugar length analysis
@@ -12,7 +13,6 @@ import order
 # - Torsional angle analysis
 # - Contact data ??? - Not necessary yet
 # - Add them all into one pipeline x 3
-
 
 if __name__ == '__main__':
     
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     for file_type in gmx_files:
         parser.add_argument(f'-{file_type}', type=str)
 
-    special_arguments = ['out', 'deffnm', 'gnm', 'mol', 'frames', 'time', 'nn', 'lps', 'bead', 'xvg']
+    special_arguments = ['out', 'deffnm', 'gnm', 'mol', 'frames', 'time', 'nn', 'lps', 'bead', 'xvg', 'il', 'ol', 'ib', 'ob']
     for arg in special_arguments:
         parser.add_argument(f'-{arg}', type=str)
 
@@ -52,5 +52,7 @@ if __name__ == '__main__':
         index.run(args.gro, args.lps, args.ions, args.ndx)
     elif args.command == 'order':
         order.run(args.xtc, args.tpr, args.lps, 0, str(args.time), (0, 0, 1), args.out)
+    elif args.command == 'thickness':
+        thickness.run(args.gro, args.xtc, args.il, args.ol, args.ib, args.ob, int(args.frames))
     else:
         print('Command not recognized')
