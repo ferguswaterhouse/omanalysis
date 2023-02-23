@@ -3,6 +3,7 @@ import gromacs as gmx
 import neighbour as nn
 import area
 import index
+import order
 
 # TO DO:
 # - Order parameters
@@ -10,6 +11,7 @@ import index
 # - Contact data ???
 # - Add sugar length analysis
 # - Add them all into one pipeline x 3
+# - Convert order.py to an MDAnalysis script
 
 
 if __name__ == '__main__':
@@ -23,7 +25,7 @@ if __name__ == '__main__':
     for file_type in gmx_files:
         parser.add_argument(f'-{file_type}', type=str)
 
-    special_arguments = ['out', 'deffnm', 'gnm', 'mol', 'frames', 'nn', 'lps', 'bead', 'xvg']
+    special_arguments = ['out', 'deffnm', 'gnm', 'mol', 'frames', 'time', 'nn', 'lps', 'bead', 'xvg']
     for arg in special_arguments:
         parser.add_argument(f'-{arg}', type=str)
 
@@ -48,5 +50,7 @@ if __name__ == '__main__':
         area.run(args.edr, args.xvg, 252)
     elif args.command == 'index-complete':
         index.run(args.gro, args.lps, args.ions, args.ndx)
+    elif args.command == 'order':
+        order.run(args.xtc, args.tpr, args.lps, 0, str(args.time), (0, 0, 1), args.out)
     else:
         print('Command not recognized')

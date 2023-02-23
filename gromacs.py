@@ -66,3 +66,17 @@ def index(gro_file, out_file, index_input):
     print(' > CREATING INDEX FILE...')
     subprocess.run([index_cmd], shell=True, input=index_input, encoding='ascii')
     print(' > INDEX FILE CREATED...')
+
+
+def frame_dump(xtc_file, tpr_file, initial_time, final_time, frame_skip, lipid, outdir, file_name):
+
+    cmd = 'gmx trjconv -f {xtc} -s {tpr} -b {int} -e {fit} -sep -skip {skp} -pbc whole -o {odr}/{fnm}_.gro > /dev/null'.format(
+        xtc=xtc_file,
+        tpr=tpr_file,
+        int=initial_time,
+        fit=final_time,
+        skp=frame_skip,
+        odr=outdir,
+        fnm=file_name
+    )
+    subprocess.run([cmd], shell=True, input=lipid, encoding='ascii')
