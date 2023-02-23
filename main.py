@@ -4,6 +4,13 @@ import neighbour as nn
 import area
 import index
 
+# TO DO:
+# - Order parameters
+# - Add membrane thickness analysis
+# - Contact data ???
+# - Add sugar length analysis
+# - Add them all into one pipeline x 3
+
 
 if __name__ == '__main__':
     
