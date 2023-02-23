@@ -7,12 +7,12 @@ import order
 import thickness
 
 # TO DO:
+# - Add membrane thickness analysis - DONE
+# - Torsional angle analysis
 # - Add sugar length analysis
 # - Order parameters - Change to MDAnalysis?
-# - Add membrane thickness analysis - How to do this? - Average phosphate position for each frame
-# - Torsional angle analysis
-# - Contact data ??? - Not necessary yet
 # - Add them all into one pipeline x 3
+# - Contact data ??? - Not necessary yet
 
 if __name__ == '__main__':
     
