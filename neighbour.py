@@ -1,5 +1,3 @@
-# Takes molecule and bead name to treat as molecule centre and calculates the nearest neighbour index for each molecule in the trajectory.
-
 import MDAnalysis as mda
 import MDAnalysis.analysis.distances as dist
 import numpy as np
