@@ -6,6 +6,7 @@ import index
 import order
 import thickness
 import torsion
+import files
 
 # TO DO:
 # - Order parameters - Change to MDAnalysis?
@@ -57,5 +58,8 @@ if __name__ == '__main__':
         thickness.run(args.gro, args.xtc, args.il, args.ol, args.ib, args.ob, int(args.frames))
     elif args.command == 'torsion':
         torsion.run(args.gro, args.xtc, args.out)
+    elif args.command == 'sep-res':
+        files.seperate_residues(args.gro, args.mol, args.out)
+        print(' SUCCESS: SEPERATED {m} RESIDUES AND WRITTEN TO {o}'.format(m=args.mol, o=args.out))
     else:
         print('Command not recognized')
