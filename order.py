@@ -1,10 +1,5 @@
-import argparse
-import subprocess
-from dataclasses import dataclass
-import os
+import MDAnalysis as mda
 import numpy as np
-import files
-import gromacs as gmx
 
 
 CHAIN_TOPOLOGY = {
@@ -26,100 +21,82 @@ CHAIN_TOPOLOGY = {
     }
 }
 
-# ====== CALCULATIONS =======
+
+def get_bonds(chain):
+    bonds = []
+    for i in range(len(chain)-1):
+        bonds.append((chain[i], chain[i+1]))
+    return bonds
+
+
 def vec3_magnitude(vec3):
     return (vec3[0] ** 2 + vec3[1] ** 2 + vec3[2] ** 2) ** (1 / 2)
 
 
-def calculate_angle_to_normal(frame, resn, i, j, normal):
-    vecij = np.array((
-        frame.residues[resn][j].x - frame.residues[resn][i].x,
-        frame.residues[resn][j].y - frame.residues[resn][i].y,
-        frame.residues[resn][j].z - frame.residues[resn][i].z
-    ))
+def calculate_angle_to_normal(vectorij, normal):
     vec_normal = np.array((normal[0], normal[1], normal[2]))
-    vecij_mag = vec3_magnitude(vecij)
-    uvecij = vecij / vecij_mag
-    return np.arccos(np.dot(vec_normal, uvecij))
+    vectorij_mag = vec3_magnitude(vectorij)
+    uniform_vectorij = vectorij / vectorij_mag
+    return np.arccos(np.dot(vec_normal, uniform_vectorij))
 
 
 def order_function(angle):
     return (3 / 2) * np.cos(angle) ** 2 - (1 / 2)
 
-# ====== INPUT =======
-def read_all_frames(frame_dir, file_name):
-    frames = []
-    for i in range(len(os.listdir(frame_dir))-1):
-        file = '{dir}/{fnm}_{n}.gro'.format(dir=frame_dir, fnm=file_name, n=str(i))
-        frames.append(files.read_gro_file(file))
-    return frames
+
+def calculate_bond_order(vectorij, normal):
+    angle = calculate_angle_to_normal(vectorij, normal)
+    return order_function(angle)
 
 
-def get_all_bonds(chain_topology):
-    bonds = []
-    for beads in chain_topology.values():
-        for i in range(len(beads)-1):
-            bonds.append((beads[i], beads[i+1]))
-    return bonds
+def run(gro_file, xtc_file, molecule, normal):
 
-# ====== PROCESSING =======
-def calculate_order_for_all_bonds(frame, normal, topology):
-    all_bond_orders_for_all_frames = []
-    for i, j in get_all_bonds(topology):
-        bond_orders_for_frame = []
-        for resn in frame.residues.keys():
-            angle = calculate_angle_to_normal(frame, resn, i, j, normal)
-            bond_orders_for_frame.append(order_function(angle))
-        all_bond_orders_for_all_frames.append(np.array(bond_orders_for_frame))
-    return np.array(all_bond_orders_for_all_frames)
+    print(' > LIPID ORDER PARAMETER ANALYSIS OF {m}...'.format(m=molecule))
 
+    # LOADS INPUT AND SELECTS LIPID TAIL BEADS  
+    u = mda.Universe(gro_file, xtc_file) # NEEDS NO JUMP XTC FILE!
 
-# def calculate_bond_orders_for_all_frames(frames, normal, topology):
-#     all_orders = []
-#     for frame in frames:
-#         frame_orders = calculate_order_for_all_bonds(frame, normal, topology)
-#         all_orders.append(frame_orders)
-#     return np.array(all_orders)
+    lipid_tail_bead_names = [bead for chain in CHAIN_TOPOLOGY[molecule].values() for bead in chain]
+    lipid_tail_beads = u.select_atoms('resname {} and name {}'.format(molecule, ' '.join(lipid_tail_bead_names)))
 
-
-# def average_order_data(orders, chain_topologies):
-#     bond_traj_averages = {}
-#     chain_traj_averages = {}
-#     average_per_frame = np.array([np.mean(frame, axis=1) for frame in orders])
-#     average_over_trajectory = np.mean(average_per_frame, axis=0)
-#     for i, bond in enumerate(get_all_bonds(chain_topologies)):
-#         bond_traj_averages[bond] = average_over_trajectory[i]
-#     for i, chain in chain_topologies.items():
-#         chain_orders = []
-#         chain_contents = chain.split()
-#         for x in range(len(chain_contents)-1):
-#             bond = (chain_contents[x], chain_contents[x+1])
-#             chain_orders.append(bond_traj_averages[bond])
-#         chain_traj_averages[i] = np.mean(chain_orders)
-#     return bond_traj_averages, chain_traj_averages, np.mean(list(chain_traj_averages.values()))
+    # FLATTENS CHAIN TOPOLOGY INTO LIST OF BONDS: [(bead_name_i, bead_name_j), ...]
+    list_of_all_bond_types = [(bead_name_i, bead_name_j) for chain in CHAIN_TOPOLOGY[molecule].values() for bead_name_i, bead_name_j in get_bonds(chain)]
     
-# ====== RUNNING =======
-def run(xtc_file, tpr_file, lipid, initial_time, final_time, normal, frame_dump_dir):
+    # FINDS CORRESPONDING ATOMS IN UNIVERSE FOR ALL BONDS: [[(atom_i, atom_j), ...], ...]
+    corresponding_atoms_for_all_bond_types = [[] for i in range(len(list_of_all_bond_types))]
+    for residue in lipid_tail_beads.residues:
+        for i, (bead_name_i, bead_name_j) in enumerate(list_of_all_bond_types):
+            atom_i = residue.atoms.select_atoms('name {}'.format(bead_name_i))[0]
+            atom_j = residue.atoms.select_atoms('name {}'.format(bead_name_j))[0]
+            corresponding_atoms_for_all_bond_types[i].append((atom_i, atom_j))
+    
+    # ITERATES OVER ALL FRAMES OF THE TRAJECTORY AND CALCULATES BOND ORDER FOR ALL BONDS
+    last_frame = len(u.trajectory)
+    all_bond_orders_list = [[] for i in range(len(list_of_all_bond_types))]
+    # Iterates over all frames of the trajectory
+    for timestep in u.trajectory:
+        print(' > {cf}/{lf}  '.format(cf=str(timestep.frame), lf=str(last_frame)), end='\r', flush=True)
+        # Iterates over all bond types
+        for bond_i, bonds in enumerate(corresponding_atoms_for_all_bond_types):
+            bond_orders = []
+            # Iterates over all residues
+            for atom_i, atom_j in bonds:
+                position_i, position_j = atom_i.position, atom_j.position
+                vectorij = position_j - position_i
+                bond_orders.append(calculate_bond_order(vectorij, normal))
+            all_bond_orders_list[bond_i].extend(bond_orders)
+    
+    all_bond_orders_array = np.array(all_bond_orders_list)
+    
+    # PRINTS RESULTS
+    list_of_corresponding_chains = [chain_i for chain_i, chain in CHAIN_TOPOLOGY[molecule].items() for i in range(len(get_bonds(chain)))]
 
-    print(' > RUNNING LIPID ORDER PARAMETER ANALYSIS...')
+    avg_bond_orders = np.mean(all_bond_orders_array, axis=1)
+    print(' > LIPID ORDER PARAMETERS ANALYSIS COMPLETE')
+    print(' > RESULTS:')
 
-    topology = CHAIN_TOPOLOGY[lipid]  
-    frame_name = 'frame_dump'
+    print(' '.join([bead_name_i + '-' + bead_name_j for bead_name_i, bead_name_j in list_of_all_bond_types]))
+    print('   ' + '       '.join(str(chain_i) for chain_i in list_of_corresponding_chains))
+    print('  ' + '   '.join([str(round(order, 3)) for order in avg_bond_orders]))
 
-    gmx.frame_dump(xtc_file, tpr_file, initial_time, final_time, 20, lipid, frame_dump_dir, frame_name)
-    frames = read_all_frames(frame_dump_dir, frame_name)
-
-    last_frame = len(frames)
-
-    all_orders = []
-    for i, frame in enumerate(frames):
-        print(' > {}'.format(str(i)) + '/' + str(last_frame), end='\r', flush=True) # Show progress as current frame
-        frame_orders = calculate_order_for_all_bonds(frame, normal, topology)
-        all_orders.append(frame_orders)
-    orders = np.array(all_orders)
-
-    print(' > LIPID ORDER PARAMETER ANALYSIS COMPLETE')
-    return orders
-
-    # bond_averages, chain_averages, average = average_order_data(orders, topology)
-    # return bond_averages, chain_averages, average
+    return all_bond_orders_array, list_of_all_bond_types, list_of_corresponding_chains

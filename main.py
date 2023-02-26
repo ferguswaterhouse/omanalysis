@@ -3,9 +3,9 @@ import gromacs as gmx
 import neighbour as nn
 import area
 import index
-import order
 import thickness
 import torsion
+import order
 import files
 
 # TO DO:
@@ -52,12 +52,12 @@ if __name__ == '__main__':
         area.run(args.edr, args.xvg, 252)
     elif args.command == 'index-complete':
         index.run(args.gro, args.lps, args.ions, args.ndx)
-    elif args.command == 'order':
-        order.run(args.xtc, args.tpr, args.lps, 0, str(args.time), (0, 0, 1), args.out)
     elif args.command == 'thickness':
         thickness.run(args.gro, args.xtc, args.il, args.ol, args.ib, args.ob, int(args.frames))
     elif args.command == 'torsion':
         torsion.run(args.gro, args.xtc, args.out)
+    elif args.command == 'order':
+        order.run(args.gro, args.xtc, args.mol, (0, 0, 1))
     elif args.command == 'sep-res':
         files.seperate_residues(args.gro, args.mol, args.out)
         print(' SUCCESS: SEPERATED {m} RESIDUES AND WRITTEN TO {o}'.format(m=args.mol, o=args.out))
