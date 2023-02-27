@@ -4,7 +4,7 @@ from MDAnalysis.analysis import dihedrals, base
 import argparse
 
 
-def run(gro_dir, xtc_dir, out_dir):
+def run(gro_dir, xtc_dir):
 
     u = mda.Universe(gro_dir, xtc_dir)
 
@@ -25,9 +25,5 @@ def run(gro_dir, xtc_dir, out_dir):
     glcn_glcn_angles.run()
     glcn_kdo_angles.run()
     kdo_kdo_angles.run()
-
-    # np.savetxt(X=glcn_glcn_angles.results.angles, fname='/'.join([out_dir, 'glcn_glcn.tor']), header='TORSIONAL ANGLE BETWEEN GlcN and GlcN: FRAMES x RESIDUES')
-    # np.savetxt(X=glcn_kdo_angles.results.angles, fname='/'.join([out_dir, 'glcn_kdo.tor']), header='TORSIONAL ANGLE BETWEEN GlcN and KdoI: FRAMES x RESIDUES')
-    # np.savetxt(X=kdo_kdo_angles.results.angles, fname='/'.join([out_dir, 'kdo_kdo.tor']), header='TORSIONAL ANGLE BETWEEN KdoI and KdoII: FRAMES x RESIDUES')
 
     return glcn_glcn_angles.results.angles, glcn_kdo_angles.results.angles, kdo_kdo_angles.results.angles

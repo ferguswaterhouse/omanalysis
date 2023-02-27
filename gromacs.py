@@ -7,7 +7,7 @@ def density(xtc_file, tpr_file, ndx_file, out_file, ndx_group_name, centre_group
         tpr=tpr_file,
         ndx=ndx_file,
         out=out_file)
-    density_input = '{i}\n{c}\n'.format(i=ndx_group_name, c=centre_group_name)
+    density_input = '{c}\n{i}\n'.format(c=centre_group_name, i=ndx_group_name)
     print(' > RUNNING GMX DENSITY FOR {}...'.format(ndx_group_name))
     subprocess.run(density_command, shell=True, input=density_input, encoding='ascii')
     print(' > GMX DENSITY FOR {} COMPLETE'.format(ndx_group_name))
@@ -66,17 +66,3 @@ def index(gro_file, out_file, index_input):
     print(' > CREATING INDEX FILE...')
     subprocess.run([index_cmd], shell=True, input=index_input, encoding='ascii')
     print(' > INDEX FILE CREATED...')
-
-
-def frame_dump(xtc_file, tpr_file, initial_time, final_time, frame_skip, lipid, outdir, file_name):
-
-    cmd = 'gmx trjconv -f {xtc} -s {tpr} -b {int} -e {fit} -sep -skip {skp} -pbc whole -o {odr}/{fnm}_.gro > /dev/null'.format(
-        xtc=xtc_file,
-        tpr=tpr_file,
-        int=initial_time,
-        fit=final_time,
-        skp=frame_skip,
-        odr=outdir,
-        fnm=file_name
-    )
-    subprocess.run([cmd], shell=True, input=lipid, encoding='ascii')

@@ -118,8 +118,6 @@ def create_all_groups(start_index, lps, ions):
     ndx_groups_to_define.extend(grouped_group_names)
     ndx_groups_to_define.extend(ions) # Adds selected ions to list of groups to define
 
-    print(ndx_groups_to_define)
-
     ndx_commands = ['\n'.join([ndx_group_commands[ndx_group_name], 'name {} {}'.format(str(start_index+i), ndx_group_name)]) for i, ndx_group_name in enumerate(ndx_groups_to_define)]
     ndx_commands.append('q\n')
     ndx_input = '\n'.join(ndx_commands)
@@ -127,7 +125,7 @@ def create_all_groups(start_index, lps, ions):
     return ndx_input
 
 
-def run(gro_file, lps, ions, out_file):
-    default_index_groups = learn_default_index_groups(gro_file, 'default_'+out_file)
+def run(gro_file, lps, ions, default_file, out_file):
+    default_index_groups = learn_default_index_groups(gro_file, default_file)
     ndx_input = create_all_groups(len(default_index_groups), lps, ions)
     gromacs.index(gro_file, out_file, ndx_input)
