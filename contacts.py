@@ -12,7 +12,9 @@ def get_unique_bead_types(bead_group):
     return unique_bead_types
 
 
-def convert_to_array_in_terms_of_bead_types(bead_types, all_bead_contacts_per_frame):
+def convert_to_array_in_terms_of_bead_types(bead_group, all_bead_contacts_per_frame):
+
+    bead_types = get_unique_bead_types(bead_group)
 
     all_ion_contacts_in_traj = [] # Array: Frame x Bead Type x Residue
 
@@ -20,7 +22,7 @@ def convert_to_array_in_terms_of_bead_types(bead_types, all_bead_contacts_per_fr
         all_lps_ion_contacts_in_frame = [] # Array: Bead Type x Residue
 
         for bead_type in bead_types:
-            all_lps_ion_contacts_for_bead_type_in_frame = ion_contacts[np.where(bead_types.names == bead_type)] # Array: Residue
+            all_lps_ion_contacts_for_bead_type_in_frame = ion_contacts[np.where(bead_group.names == bead_type)] # Array: Residue
 
             all_lps_ion_contacts_in_frame.append(all_lps_ion_contacts_for_bead_type_in_frame)
         all_ion_contacts_in_traj.append(all_lps_ion_contacts_in_frame)
@@ -46,8 +48,6 @@ def run(gro_dir, xtc_dir, ion, lps, frames, radius):
 
     number_of_lps_beads = len(lps_bead_group)
 
-    lps_bead_types = get_unique_bead_types(lps_bead_group) # Gets a list of all the unique bead types in the lps
-
     lps_ion_contacts_per_frame = np.zeros((frames, number_of_lps_beads), dtype=int) # Defines a matrix to store the number of ion contacts for each bead at each frame
     # Array: Frame x Bead
 
@@ -64,14 +64,17 @@ def run(gro_dir, xtc_dir, ion, lps, frames, radius):
             number_of_ion_contacts_for_bead_i = lps_ion_contacts[bead_i].sum()
             lps_ion_contacts_per_frame[ts.frame, bead_i] = number_of_ion_contacts_for_bead_i
 
-    bead_type_contacts = convert_to_array_in_terms_of_bead_types(lps_bead_types, lps_ion_contacts_per_frame) # Array: Frame x Bead Type x Residue = # Ion Contacts
+    bead_type_contacts = convert_to_array_in_terms_of_bead_types(lps_bead_group, lps_ion_contacts_per_frame) # Array: Frame x Bead Type x Residue = # Ion Contacts
 
     # PRINT RESULTS
     avg_bead_type_contacts_per_residue = np.mean(bead_type_contacts, axis=2)
     avg_bead_type_contacts_per_residue_per_frame = np.mean(avg_bead_type_contacts_per_residue, axis=0)
+
+    lps_bead_types = get_unique_bead_types(lps_bead_group) # Gets a list of all the unique bead types in the lps
     
     print(' > COMPLETE.')
     print(' > RESULTS:')
+    print(' Bead Name   Average #Contacts / Bead / Frame')
     for i in range(len(lps_bead_types)):
         print(' {} = {}'.format(lps_bead_types[i], round(avg_bead_type_contacts_per_residue_per_frame[i], 3)))
 

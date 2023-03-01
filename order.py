@@ -49,7 +49,7 @@ def calculate_bond_order(vectorij, normal):
     return order_function(angle)
 
 
-def run(gro_file, xtc_file, molecule, normal):
+def run(gro_file, xtc_file, molecule, normal, frames):
 
     print(' > LIPID ORDER PARAMETER ANALYSIS OF {m}...'.format(m=molecule))
 
@@ -71,11 +71,10 @@ def run(gro_file, xtc_file, molecule, normal):
             corresponding_atoms_for_all_bond_types[i].append((atom_i, atom_j))
     
     # ITERATES OVER ALL FRAMES OF THE TRAJECTORY AND CALCULATES BOND ORDER FOR ALL BONDS
-    last_frame = len(u.trajectory)
     all_bond_orders_list = [[] for i in range(len(list_of_all_bond_types))]
     # Iterates over all frames of the trajectory
-    for timestep in u.trajectory:
-        print(' > {cf}/{lf}  '.format(cf=str(timestep.frame), lf=str(last_frame)), end='\r', flush=True)
+    for timestep in u.trajectory[:frames]:
+        print(' > {cf}/{lf}  '.format(cf=str(timestep.frame), lf=str(frames)), end='\r', flush=True)
         # Iterates over all bond types
         for bond_i, bonds in enumerate(corresponding_atoms_for_all_bond_types):
             bond_orders = []
@@ -92,11 +91,11 @@ def run(gro_file, xtc_file, molecule, normal):
     list_of_corresponding_chains = [chain_i for chain_i, chain in CHAIN_TOPOLOGY[molecule].items() for i in range(len(get_bonds(chain)))]
 
     avg_bond_orders = np.mean(all_bond_orders_array, axis=1)
-    print(' > LIPID ORDER PARAMETERS ANALYSIS COMPLETE')
     print(' > RESULTS:')
 
     print(' '.join([bead_name_i + '-' + bead_name_j for bead_name_i, bead_name_j in list_of_all_bond_types]))
     print('   ' + '       '.join(str(chain_i) for chain_i in list_of_corresponding_chains))
     print('  ' + '   '.join([str(round(order, 3)) for order in avg_bond_orders]))
+    print(' > LIPID ORDER PARAMETERS ANALYSIS COMPLETE\n')
 
-    return all_bond_orders_array, list_of_all_bond_types, list_of_corresponding_chains
+    return all_bond_orders_array, list_of_all_bond_types, list_of_corresponding_chains # Array; (Bond types, #Residues x #Frames); Value=order parameter

@@ -1,6 +1,61 @@
 import gromacs
 import files
 
+def UNIVERSAL_LPS_GROUP_NAMES(lps):
+    return [
+        '{}_HEAD_PO41'.format(lps),
+        '{}_HEAD_PO42'.format(lps),
+        '{}_HEAD_PO4'.format(lps),
+        '{}_HEAD_COO1'.format(lps),
+        '{}_HEAD_COO2'.format(lps),
+        '{}_HEAD_COO'.format(lps),
+        '{}_PO4'.format(lps),
+        '{}_CORE'.format(lps),
+        '{}_HEAD'.format(lps),
+        '{}_GLYC'.format(lps),
+        '{}_CARB'.format(lps),
+        '{}_TAIL'.format(lps),
+        '{}_TERM'.format(lps),
+    ]
+
+def UNIQUE_RAMP_LPS_GROUP_NAMES(lps):
+    return [
+        '{}_CORE_PO41'.format(lps),
+        '{}_CORE_PO42'.format(lps),
+        '{}_CORE_PO4'.format(lps)
+    ]
+
+
+INNER_LEAFLET_GROUP_NAMES = [
+    'POPE_HEAD',
+    'POPE_PO4',
+    'POPE_GLYC',
+    'POPE_CARB',
+    'POPE_TAIL',
+    'POPE_TERM',
+    'POPG_HEAD',
+    'POPG_PO4',
+    'POPG_GLYC',
+    'POPG_CARB',
+    'POPG_TAIL',
+    'POPG_TERM',
+    'CDL2_HEAD',
+    'CDL2_PO4',
+    'CDL2_GLYC',
+    'CDL2_CARB',
+    'CDL2_TAIL',
+    'CDL2_TERM'
+]
+
+GROUPED_GROUP_NAMES = [
+    'ALL_HEAD',
+    'ALL_PO4',
+    'ALL_GLYC',
+    'ALL_CARB',
+    'ALL_TAIL',
+    'ALL_TERM'
+]
+
 
 def learn_default_index_groups(gro_file, default_ndx_file):
     gromacs.index(gro_file, default_ndx_file, 'q\n')
@@ -58,64 +113,11 @@ def create_all_groups(start_index, lps, ions):
 
     ndx_groups_to_define = [] # List of groups to define in command
 
-    # List of possible index groups
-    universal_lps_group_names = [
-        '{}_HEAD_PO41'.format(lps),
-        '{}_HEAD_PO42'.format(lps),
-        '{}_HEAD_PO4'.format(lps),
-        '{}_HEAD_COO1'.format(lps),
-        '{}_HEAD_COO2'.format(lps),
-        '{}_HEAD_COO'.format(lps),
-        '{}_PO4'.format(lps),
-        '{}_CORE'.format(lps),
-        '{}_HEAD'.format(lps),
-        '{}_GLYC'.format(lps),
-        '{}_CARB'.format(lps),
-        '{}_TAIL'.format(lps),
-        '{}_TERM'.format(lps),
-    ]
-
-    ramp_lps_group_names = [
-        '{}_CORE_PO41'.format(lps),
-        '{}_CORE_PO42'.format(lps),
-        '{}_CORE_PO4'.format(lps)
-    ]
-
-    inner_leaflet_group_names = [
-        'POPE_HEAD',
-        'POPE_PO4',
-        'POPE_GLYC',
-        'POPE_CARB',
-        'POPE_TAIL',
-        'POPE_TERM',
-        'POPG_HEAD',
-        'POPG_PO4',
-        'POPG_GLYC',
-        'POPG_CARB',
-        'POPG_TAIL',
-        'POPG_TERM',
-        'CDL2_HEAD',
-        'CDL2_PO4',
-        'CDL2_GLYC',
-        'CDL2_CARB',
-        'CDL2_TAIL',
-        'CDL2_TERM'
-    ]
-
-    grouped_group_names = [
-        'ALL_HEAD',
-        'ALL_PO4',
-        'ALL_GLYC',
-        'ALL_CARB',
-        'ALL_TAIL',
-        'ALL_TERM'
-    ]
-
     # Adds the group names to a list of groups to define
-    ndx_groups_to_define.extend(universal_lps_group_names)
-    if lps == 'RAMP': ndx_groups_to_define.extend(ramp_lps_group_names)
-    ndx_groups_to_define.extend(inner_leaflet_group_names)
-    ndx_groups_to_define.extend(grouped_group_names)
+    ndx_groups_to_define.extend(UNIVERSAL_LPS_GROUP_NAMES(lps))
+    if lps == 'RAMP': ndx_groups_to_define.extend(UNIQUE_RAMP_LPS_GROUP_NAMES(lps))
+    ndx_groups_to_define.extend(INNER_LEAFLET_GROUP_NAMES)
+    ndx_groups_to_define.extend(GROUPED_GROUP_NAMES)
     ndx_groups_to_define.extend(ions) # Adds selected ions to list of groups to define
 
     ndx_commands = ['\n'.join([ndx_group_commands[ndx_group_name], 'name {} {}'.format(str(start_index+i), ndx_group_name)]) for i, ndx_group_name in enumerate(ndx_groups_to_define)]

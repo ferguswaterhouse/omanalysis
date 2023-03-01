@@ -26,7 +26,7 @@ def no_jump(xtc_file, tpr_file, ndx_file, out_file):
 
 # Runs gmx msd for the given index group in the membrane plane (normal to Z axis)
 def msd(xtc_file, tpr_file, ndx_file, out_file, ndx_group_name):
-    msd_cmd = 'gmx msd -f {xtc} -s {tpr} -n {ndx} -lateral z -o {out}'.format(
+    msd_cmd = 'gmx msd -f {xtc} -s {tpr} -n {ndx} -lateral z -tu ns -o {out}'.format(
         xtc=xtc_file,
         tpr=tpr_file,
         ndx=ndx_file,
@@ -38,7 +38,7 @@ def msd(xtc_file, tpr_file, ndx_file, out_file, ndx_group_name):
 
 # Runs gmx msd for the given index group in the membrane plane (normal to Z axis) removing the center of mass motion
 def msd_rmcomm(xtc_file, tpr_file, ndx_file, out_file, ndx_group_name):
-    msd_cmd = 'gmx msd -f {xtc} -s {tpr} -n {ndx} -rmcomm -lateral z -o {out}'.format(
+    msd_cmd = 'gmx msd -f {xtc} -s {tpr} -n {ndx} -rmcomm -lateral z -tu ns -o {out}'.format(
         xtc=xtc_file,
         tpr=tpr_file,
         ndx=ndx_file,
@@ -47,16 +47,6 @@ def msd_rmcomm(xtc_file, tpr_file, ndx_file, out_file, ndx_group_name):
     print(' > RUNNING GMX MSD RMCOMM FOR {}...'.format(ndx_group_name))
     subprocess.run([msd_cmd], shell=True, input=msd_input, encoding='ascii')
     print(' > GMX MSD RMCOMM FOR {} COMPLETE'.format(ndx_group_name))
-
-
-def boxxy(edr_file, out_file):
-    energy_cmd = "gmx energy -f {edr} -o {xvg}".format(
-        edr=edr_file, 
-        xvg=out_file)
-    energy_input = '12\n13\n\n'
-    print(' > GETTING BOX X AND Y DIMENSIONS...')
-    subprocess.run([energy_cmd], shell=True, input=energy_input, encoding='ascii')
-    print(' > BOX X AND Y DIMENSIONS RETRIEVED...')
 
 
 def index(gro_file, out_file, index_input):
